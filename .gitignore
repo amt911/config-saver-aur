@@ -1,0 +1,38 @@
+# Ignore makepkg build artifacts
+*.pkg.tar.*
+*.src.tar.*
+*.tar.*
+*.log
+*.sig
+*.part
+*.upd
+*.bak
+*.tmp
+pkg/
+build/
+*.lock
+*.xz
+*.zst
+*.gz
+*.bz2
+*.zip
+*.7z
+*.deb
+*.rpm
+*.o
+*.so
+*.swp
+*.swo
+*.DS_Store
+
+# Ignore editor/IDE files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore backup files
+*~
+
+# Ignore source files
+src/
