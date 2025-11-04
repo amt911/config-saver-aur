@@ -9,7 +9,7 @@ license=('MIT')
 depends=('python' 'python-pydantic' 'python-colorama' 'python-tqdm' 'python-yaml' 'python-rich')
 makedepends=('python-build' 'python-installer' 'python-wheel' 'git')
 # Cambia 'main' por el nombre de la rama que quieras usar
-_gitbranch="expand-vars"       # DEBUG
+_gitbranch="systemd-timers"       # DEBUG
 source=("$pkgname::git+$url#branch=${_gitbranch}")      # DEBUG
 sha256sums=('SKIP')
 # source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")        # Oficial
@@ -25,4 +25,7 @@ package() {
     python -m installer --destdir="$pkgdir" dist/*.whl
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
     install -Dm644 configs/default-config.yaml "$pkgdir/etc/config-saver/configs/default-config.yaml"
+    # Install systemd unit and timer (installed system-wide under /usr/lib/systemd/system)
+    install -Dm644 contrib/systemd/system/config-saver@.service "$pkgdir/usr/lib/systemd/system/config-saver@.service"
+    install -Dm644 contrib/systemd/system/config-saver@.timer "$pkgdir/usr/lib/systemd/system/config-saver@.timer"
 }
