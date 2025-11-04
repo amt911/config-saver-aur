@@ -9,7 +9,7 @@ license=('MIT')
 depends=('python' 'python-pydantic' 'python-colorama' 'python-tqdm' 'python-yaml' 'python-rich')
 makedepends=('python-build' 'python-installer' 'python-wheel' 'git')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
-sha256sums=('f1bb27bffb0e3251e211d89db1c1dbcc270ab0f62e5c6468f44bfd58c78fa582')     # Generated using makepkg -g
+sha256sums=('4ea9e326d39540f73faecedcd9459242f3aa4756e145b6bb64e7893c5c8f82be')     # Generated using makepkg -g
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
