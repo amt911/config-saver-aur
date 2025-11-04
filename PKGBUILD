@@ -1,6 +1,6 @@
 # Maintainer: amt911 <your.email@example.com>
 pkgname=config-saver
-pkgver=3.0.1
+pkgver=3.0.2
 pkgrel=1
 pkgdesc="Utility to back up and restore configuration files"
 arch=('any')
@@ -9,7 +9,7 @@ license=('MIT')
 depends=('python' 'python-pydantic' 'python-colorama' 'python-tqdm' 'python-yaml' 'python-rich')
 makedepends=('python-build' 'python-installer' 'python-wheel' 'git')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
-sha256sums=('54e7bb90bff67fd205e94e6bcc86477a8a5b6f82ec1319be8e612d36a5a750d4')     # Generated using makepkg -g
+sha256sums=('f1bb27bffb0e3251e211d89db1c1dbcc270ab0f62e5c6468f44bfd58c78fa582')     # Generated using makepkg -g
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
