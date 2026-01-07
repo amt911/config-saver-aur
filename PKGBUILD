@@ -20,7 +20,12 @@ package() {
     cd "$srcdir/$pkgname-$pkgver"
     python -m installer --destdir="$pkgdir" dist/*.whl
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
-    install -Dm644 configs/default-config.yaml "$pkgdir/etc/config-saver/configs/default-config.yaml"
+    
+    # Install all config files
+    install -d "$pkgdir/etc/config-saver/configs"
+    cp -r configs/* "$pkgdir/etc/config-saver/configs/"
+    find "$pkgdir/etc/config-saver/configs" -type f -exec chmod 644 {} \;
+    find "$pkgdir/etc/config-saver/configs" -type d -exec chmod 755 {} \;
     
     # Install systemd unit and timer (installed system-wide under /usr/lib/systemd/system)
     install -Dm644 contrib/systemd/system/config-saver@.service "$pkgdir/usr/lib/systemd/system/config-saver@.service"
