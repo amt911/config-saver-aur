@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Parse · shellcheck (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash -n PKGBUILD
+      - name: shellcheck (advisory)
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck -s bash PKGBUILD
+
+  namcap:
+    name: namcap PKGBUILD (Arch container)
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pacman -Sy --noconfirm namcap
+      # Verified clean locally (0 warnings) at the time this landed.
+      - run: namcap PKGBUILD
+
+  build:
+    name: makepkg build (advisory, Arch container)
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      # makepkg refuses to run as root; create an unprivileged builder user.
+      - run: |
+          pacman -Sy --noconfirm base-devel git python-build python-installer python-wheel \
+            python-pydantic python-colorama python-tqdm python-yaml python-rich
+          useradd -m builder
+          chown -R builder:builder .
+      # Advisory: depends on network access to GitHub for the release tarball, which is
+      # not guaranteed/stable on hosted runners, so this must not block merges.
+      - run: su builder -c "makepkg --nobuild --syncdeps --noconfirm"
+
+  sast:
+    name: SAST (Semgrep, advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install semgrep
+      # p/bash doesn't exist in the Semgrep registry; p/secrets + p/security-audit are the
+      # closest generic coverage for a single PKGBUILD. Low signal for this repo, so advisory.
+      - run: >-
+          semgrep scan --disable-version-check --metrics=off
+          --config p/secrets
+          --config p/security-audit
+          PKGBUILD

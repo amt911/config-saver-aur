@@ -71,6 +71,25 @@ There are no unit tests here — quality for a packaging repo means the recipe i
 
 **Manual verification is the real test** — the acceptance criterion for a packaging change is: it builds, installs, and the installed `config-saver --help` runs and the systemd units are present. Do that yourself before claiming a change works; don't infer success from a green `makepkg` alone.
 
+## Agentic PR verification (MANDATORY on every PR)
+
+**Every PR MUST be verified end-to-end before merge, and the verdict MUST be posted as a PR
+comment** via `gh pr comment`. A headless agent (`claude -p`, local) builds the package (e.g.
+`makepkg -f` or, in CI, `namcap PKGBUILD` plus a build attempt in an `archlinux` container) and
+inspects the result, then posts the verdict; it **never merges** — it waits for you. Running the
+pass and posting the verdict comment is **not optional**. It catches what the diff and `namcap`
+alone miss: a build that only works with locally-installed extra tools, a broken `.SRCINFO`, a
+version bump pointing at a tag that doesn't exist upstream.
+
+- **Engine.** Native/packaging (no browser, no service) → build the package (`makepkg -f`,
+  ideally in a clean chroot via `extra-x86_64-build`/`makechrootpkg`) and inspect the resulting
+  `.pkg.tar.zst`: run `namcap` on it, then install and smoke-test `config-saver --help` plus the
+  presence of the systemd unit/timer and the bundled configs under `/etc/config-saver/`.
+- **Two layers.** `namcap` clean + a successful build stay the hard merge gate; the agentic pass
+  is advisory and never vetoes a merge on its own — but running it and posting the verdict
+  comment is mandatory.
+- **Hard limits.** The verdict awaits your close; the agent never merges.
+
 ## Working rules
 
 - **Use superpowers skills whenever they apply** — invoke via `Skill` before acting; process skills before implementation skills.
