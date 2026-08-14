@@ -23,7 +23,7 @@ pre_upgrade() {
 
 post_upgrade() {
     printf '%s\n' \
-        '==> config-saver 3.3.0 no longer installs example configurations into /etc.' \
+        '==> config-saver 3.3.1 no longer installs example configurations into /etc.' \
         '    Examples now live in /usr/share/config-saver/configs and are never used' \
         '    on their own. Put your own configurations in one of:' \
         '      ~/.config/config-saver/configs.d   (yours)' \
