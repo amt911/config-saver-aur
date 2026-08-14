@@ -1,7 +1,7 @@
 # Maintainer: amt911 <your.email@example.com>
 pkgname=config-saver
 pkgver=3.3.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Utility to back up and restore configuration files"
 arch=('any')
 url="https://github.com/amt911/config-saver"
