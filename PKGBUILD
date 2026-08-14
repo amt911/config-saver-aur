@@ -15,7 +15,7 @@ optdepends=('age: encrypt archives with age'
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
 # Refresh with `updpkgsums` once the upstream tag exists; the placeholder makes
 # makepkg fail loudly instead of building an unverified tarball.
-sha256sums=('SHA256-PENDING-RUN-updpkgsums')
+sha256sums=('9a0b80193fa8be4fa4adee580fcd39cbf5afb0b309e9d8794f7f30c639c4dc63')     # Generated from the 3.2.0 tag
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
