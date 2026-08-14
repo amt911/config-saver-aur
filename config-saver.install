@@ -21,7 +21,30 @@ pre_upgrade() {
     done
 }
 
+# 3.3.x also changed config-saver@.timer (RandomizedDelaySec 10m -> 0,
+# AccuracySec=1s). pacman's hooks run `daemon-reload` after this scriptlet, and
+# a reload does NOT re-arm a timer that has already elapsed: it stays "active"
+# with no next trigger and never fires again — `systemctl list-timers` shows an
+# empty NEXT. Arch packages do not restart the administrator's units, so name
+# the ones affected and let them decide.
+_warn_stale_timers() {
+    command -v systemctl > /dev/null 2>&1 || return 0
+    _timers=$(systemctl list-units --type=timer --state=active --no-legend \
+                  'config-saver@*.timer' 2>/dev/null | awk '{print $1}')
+    [ -n "$_timers" ] || return 0
+
+    printf '%s\n' \
+        '==> The timer unit changed in this release. A reload does not re-arm a' \
+        '    timer that already elapsed, so re-arm these yourself (otherwise' \
+        '    "systemctl list-timers" will show an empty NEXT and no backup runs):'
+    for _timer in $_timers; do
+        printf '%s\n' "      systemctl restart $_timer"
+    done
+}
+
 post_upgrade() {
+    _warn_stale_timers
+
     printf '%s\n' \
         '==> config-saver 3.3.1 no longer installs example configurations into /etc.' \
         '    Examples now live in /usr/share/config-saver/configs and are never used' \
