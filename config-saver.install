@@ -1,0 +1,34 @@
+# Migration for 3.3.0: the example configurations move out of /etc.
+#
+# Up to 3.2.0 the package installed configs/*.yaml into
+# /etc/config-saver/configs, so those files are package-owned and pacman removes
+# them on this upgrade. They were never declared in a backup=() array, which
+# means a file the administrator *edited in place* would be deleted without the
+# usual .pacsave copy. This scriptlet emulates that copy before pacman touches
+# anything, so no local edit is lost.
+
+_configs=/etc/config-saver/configs
+
+pre_upgrade() {
+    [ -d "$_configs" ] || return 0
+
+    # `pacman -Qkk` only prints a line for a file that differs from the package.
+    pacman -Qkk config-saver 2>/dev/null | grep "$_configs" | while read -r _line; do
+        _file=$(printf '%s' "$_line" | sed -n "s|.*\($_configs/[^ ]*\).*|\1|p")
+        [ -f "$_file" ] || continue
+        cp -a "$_file" "$_file.pacsave"
+        printf '%s\n' "==> kept your edited $_file as $_file.pacsave"
+    done
+}
+
+post_upgrade() {
+    printf '%s\n' \
+        '==> config-saver 3.3.0 no longer installs example configurations into /etc.' \
+        '    Examples now live in /usr/share/config-saver/configs and are never used' \
+        '    on their own. Put your own configurations in one of:' \
+        '      ~/.config/config-saver/configs.d   (yours)' \
+        "      $_configs   (system policy, e.g. written by dasik)" \
+        '    Copy one to get started:' \
+        '      mkdir -p ~/.config/config-saver/configs.d' \
+        '      cp /usr/share/config-saver/configs/zsh.yaml ~/.config/config-saver/configs.d/'
+}
