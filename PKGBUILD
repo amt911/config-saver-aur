@@ -1,7 +1,7 @@
 # Maintainer: amt911 <your.email@example.com>
 pkgname=config-saver
-pkgver=3.3.1
-pkgrel=2
+pkgver=3.4.0
+pkgrel=1
 pkgdesc="Utility to back up and restore configuration files"
 arch=('any')
 url="https://github.com/amt911/config-saver"
@@ -16,7 +16,7 @@ install=config-saver.install
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
 # Refresh with `updpkgsums` once the upstream tag exists; the placeholder makes
 # makepkg fail loudly instead of building an unverified tarball.
-sha256sums=('aea7395d1182fc010dbbe20f22d55862913abbbad379f6e6460386da17cb3fe0')     # Generated from the 3.3.1 tag
+sha256sums=('20b3e568a05e17edd4c8965f838c013d1f8ba880c749479de8c2478d7c651c76')     # Generated from the 3.4.0 tag
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
