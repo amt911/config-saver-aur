@@ -71,6 +71,57 @@ There are no unit tests here — quality for a packaging repo means the recipe i
 
 **Manual verification is the real test** — the acceptance criterion for a packaging change is: it builds, installs, and the installed `config-saver --help` runs and the systemd units are present. Do that yourself before claiming a change works; don't infer success from a green `makepkg` alone.
 
+## Real-system verification — what no green `makepkg` can prove
+
+`## Packaging quality` already ends with the right instinct: *manual verification is the real test;
+don't infer success from a green `makepkg` alone.* This section names the checks that instinct is
+asking for, so they can be requested by name, and the rules for writing one worth trusting.
+
+The reason it matters here is that **a PKGBUILD has no unit tests and cannot have any.** The recipe
+is a set of assertions about someone else's tarball, someone else's toolchain and someone else's
+filesystem layout, and every one of them is only tested at build and install time — on a machine
+that is not yours.
+
+What "real system" means here, concretely:
+
+- **A clean chroot**, not your dev box: `extra-x86_64-build` or `makechrootpkg`. A build that
+  succeeds only because you happen to have `python-build` installed globally is a missing
+  `makedepends` that will fail for everyone else, and it fails *silently* for you.
+- **A real install, then a real run.** `makepkg -si`, then `config-saver --help` from `PATH`,
+  then `systemctl cat config-saver@.service` and `systemd-analyze verify` on the installed unit
+  paths. A file landing in `$pkgdir` is not a program that runs.
+- **The user-visible file layout.** `/etc/config-saver/configs/` at 644 files / 755 dirs,
+  `/usr/lib/systemd/system/config-saver@.{service,timer}`, the doc under
+  `/usr/share/doc/config-saver/`. Check with `pacman -Ql config-saver`, not by reading `package()`.
+
+### The names, so you can ask for them by name
+
+| Name | What it means here |
+| --- | --- |
+| **E2E / on-system acceptance test** | Build in a clean chroot, install the resulting `.pkg.tar.zst` on a real (or throwaway) Arch system, and assert on observable results — the binary runs, `pacman -Ql` lists the files at the right paths and modes, the units are present and parse. Never on `package()` source-reading. |
+| **Contract test** | Checks that assumptions about **someone else's artifacts** hold — which is nearly the whole recipe. GitHub's auto-generated release tarballs are not guaranteed byte-stable, so a `sha256sums` that suddenly mismatches may mean the archive was regenerated, not that you made a mistake — find out which before "fixing" it. Likewise: does the upstream tag still exist; does `python -m installer` still put files where `package()` expects; did Arch bump its Python minor version, moving `site-packages` and requiring a rebuild; do `python-pydantic`/`python-rich`/`python-tqdm` in `[extra]` still satisfy what upstream imports? |
+| **Mutation testing** (here: by hand) | Remove a `makedepends` entry, rebuild in the chroot, confirm the build fails, restore. Remove a `depends` entry, install in a container, confirm the program breaks. **A dependency you have never seen the absence of is a guess**, and a check that has never failed has not been tested. |
+| **State-invariant test** | Asserts a relationship **between two files** that neither one alone can prove: `.SRCINFO` against `PKGBUILD` (the most common AUR breakage — and it is *not tracked in this repo yet*); `pkgver` against the tag the `source` actually fetched; `pkgrel` against whether `pkgver` moved; the installed file list against `depends`. Each file can be individually valid while the pair is wrong. |
+| **Test pollution / isolation leak** | Building or testing against your own system instead of an isolated one. `makepkg` on your dev box inherits every globally installed tool, so it proves nothing about a clean install; `makepkg -si` then *installs* on your daily machine, and a broken systemd unit there is a real outage, not a failed test. Use a chroot to build and a container/VM to install. |
+
+### Rules that came out of real bugs, not theory
+
+- **Prove every check can fail before you trust it green.** Drop a `makedepends`, watch the chroot
+  build break, restore. An unexercised dependency list is a wish.
+- **Never assert on a count you cannot predict.** "namcap reports fewer than 3 warnings", "the
+  package is under 200 KB" — both go green against a genuinely broken package as soon as upstream
+  adds a file, because the magnitude depends on upstream, not on your bug. Assert the **invariant**:
+  `namcap` reports **no** warning you have not justified in writing; `pacman -Ql` contains exactly
+  the paths `package()` intends; the installed entry point runs; `.SRCINFO` regenerates byte-identical
+  to what is committed.
+- **A checksum, `.SRCINFO` or `pkgrel` must die with the source it describes.** A `sha256sums` left
+  from the previous tarball, a `.SRCINFO` from before a dep change, or a `pkgrel` not reset on a new
+  `pkgver` all produce a package that installs happily and is wrong. Nothing fails.
+- **Never test destructively on your own machine.** Build in a chroot; install in a container or VM.
+  If you do install locally, know exactly how to remove it (`pacman -Rns`) before you start.
+- **Claim exactly what you verified.** "`makepkg` succeeded" is not "the package works". Say which of
+  build / clean-chroot build / install / run / unit-verify you actually did, and hand the rest over.
+
 ## Agentic PR verification (MANDATORY on every PR)
 
 **Every PR MUST be verified end-to-end before merge, and the verdict MUST be posted as a PR
