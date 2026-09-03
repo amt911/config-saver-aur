@@ -71,6 +71,13 @@ There are no unit tests here — quality for a packaging repo means the recipe i
 
 **Manual verification is the real test** — the acceptance criterion for a packaging change is: it builds, installs, and the installed `config-saver --help` runs and the systemd units are present. Do that yourself before claiming a change works; don't infer success from a green `makepkg` alone.
 
+- **Gate de mutación (60%) — no aplica aquí, y por eso queda escrito.** La plantilla exige un umbral
+  de mutación del 60% sobre la lógica de negocio; este repo es un `PKGBUILD` y sus metadatos, sin
+  código ejecutable propio ni suite que mutar. Lo que se verifica aquí es que el paquete **construye
+  e instala**, y eso lo cubren los gates de arriba más la verificación en sistema real. Si algún día
+  entra un script con tests, la regla aplica desde ese día — no lo re-discutas cada trimestre, está
+  decidido.
+
 ## Real-system verification — what no green `makepkg` can prove
 
 `## Packaging quality` already ends with the right instinct: *manual verification is the real test;
