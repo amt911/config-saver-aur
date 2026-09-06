@@ -154,6 +154,7 @@ version bump pointing at a tag that doesn't exist upstream.
 - **Keep `.SRCINFO` and checksums in lockstep with `PKGBUILD`** — regenerate both after any metadata change; never commit a `PKGBUILD` edit without them.
 - **Don't add dependencies casually** — the `depends`/`makedepends` lists are intentional and mirror the upstream requirements. Add one only when the package genuinely needs it, and prefer official-repo package names.
 - **Don't hand-edit generated fields** — `sha256sums` come from `updpkgsums`, `.SRCINFO` from `makepkg --printsrcinfo`. Regenerate, don't type.
+- **Reuse before you write** — the recipe borrows, it never reinvents. Keep `build()`/`package()` on the standard `python-build` + `python-installer` flow instead of hand-copying files; take dependency names from the official repos; mirror the shape of the sibling AUR recipes (`dasik-aur`) rather than inventing a variant. Anything upstream already ships — configs, systemd units, `README.md` — is installed from the source tree, never re-typed into the `PKGBUILD`. A value duplicated between `PKGBUILD` and `.SRCINFO` is one you regenerate, not one you keep in sync by hand.
 - **Lint before proposing done** — `namcap` on both `PKGBUILD` and the built package.
 - **Don't commit build artifacts** — respect `.gitignore`; only the recipe files belong in git.
 
