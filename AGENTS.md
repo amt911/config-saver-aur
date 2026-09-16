@@ -1,6 +1,33 @@
-# config-saver-aur — Claude Guide
+# config-saver-aur — Agent Guide
 
 Arch Linux (AUR-style) packaging repo for **`config-saver`**, a Python utility to back up and restore configuration files. This repo is the *package recipe*, not the application source — the app lives at `https://github.com/amt911/config-saver` and is pulled in as a release tarball at build time.
+
+## Agent compatibility — Codex and Claude Code
+
+This file is `AGENTS.md`: the **one** instruction file for every coding agent in this repo. Codex reads
+it directly; Claude Code reads `CLAUDE.md`, which only imports this file (`@AGENTS.md`) and holds what
+applies to Claude alone. **Edit rules here, never in `CLAUDE.md`** — two copies of a rule drift apart
+on the first edit, and each agent then obeys a different one.
+
+| Concern | Claude Code | Codex |
+| --- | --- | --- |
+| Instruction file | `CLAUDE.md` → imports `AGENTS.md` | `AGENTS.md` (root down to the working directory) |
+| Invoke a skill | `Skill` tool, or `/<skill>` | mention it (`$<skill>`), or let it trigger from its description |
+| Skills on disk | `~/.claude/skills` (links into `~/.agents/skills`) | `.agents/skills`, then `~/.agents/skills` |
+| superpowers | `superpowers@claude-plugins-official` (`/plugin install`) | `superpowers@openai-curated` (install from `/plugins`; that id is its key in `~/.codex/config.toml`) |
+| MCP servers | `claude mcp add -s user <name> -- <cmd>` | `codex mcp add <name> -- <cmd>` (`~/.codex/config.toml`) |
+| File size | imports load whole | `project_doc_max_bytes`, **32 KiB by default** — raise it when this file is bigger, or the tail is silently dropped |
+
+- **Install shared skills once, for both agents:** `npx skills add <owner/repo> -g --skill <name>`
+  writes to `~/.agents/skills` and links it for Claude Code, so both run the same version.
+- **Names in this file are capabilities, not one agent's syntax.** "Invoke the `X` skill" means the
+  `Skill` tool in Claude Code and a skill mention in Codex. An MCP server named here is used when it is
+  registered for the agent you are running in; its absence never blocks ordinary work.
+- **Modes, model caps and Git rules bind both agents.** "lite mode", "normal mode" and "modo
+  desatendido" mean the same in Codex; a cap written as "no model above Sonnet" means "no model above
+  the mid tier" there.
+- **Claude-only commands** (slash commands that are not skills) are skipped by Codex unless the same
+  capability is installed as a skill in `~/.agents/skills`.
 
 ## ⚡ superpowers — use whenever applicable
 
@@ -267,6 +294,11 @@ measured number.
 - **Reuse before you write** — the recipe borrows, it never reinvents. Keep `build()`/`package()` on the standard `python-build` + `python-installer` flow instead of hand-copying files; take dependency names from the official repos; mirror the shape of the sibling AUR recipes (`dasik-aur`) rather than inventing a variant. Anything upstream already ships — configs, systemd units, `README.md` — is installed from the source tree, never re-typed into the `PKGBUILD`. A value duplicated between `PKGBUILD` and `.SRCINFO` is one you regenerate, not one you keep in sync by hand.
 - **Lint before proposing done** — `namcap` on both `PKGBUILD` and the built package.
 - **Don't commit build artifacts** — respect `.gitignore`; only the recipe files belong in git.
+- **SOLID and the UI/UX workflow do not apply here, and that's why it's written down.** This repo
+  has no application code to apply object-oriented design principles to, and no UI to design:
+  `PKGBUILD` is a declarative recipe (`build()`/`package()` shell functions calling `python -m build`
+  / `python -m installer`) and `config-saver.install` is a pacman scriptlet. Those sections belong to
+  the `config-saver` application repo, not its AUR packaging. Decided; don't re-discuss it every quarter.
 - **Instrument before you ablate, budget the lap, and dispatch review in parallel** — a pipeline that completes with non-empty output produced output; more than three reproductions means you owe a shortcut script; a review finding is not a reproduction; and the review of task N runs alongside the implementation of N+1. See **Debugging** and **Agent orchestration** above.
 
 ## Git & GitHub
