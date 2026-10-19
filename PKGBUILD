@@ -1,6 +1,6 @@
 # Maintainer: amt911 <your.email@example.com>
 pkgname=config-saver
-pkgver=3.4.0
+pkgver=3.5.0
 pkgrel=1
 pkgdesc="Utility to back up and restore configuration files"
 arch=('any')
@@ -10,13 +10,14 @@ depends=('python' 'python-pydantic' 'python-colorama' 'python-tqdm' 'python-yaml
 makedepends=('python-build' 'python-installer' 'python-wheel' 'git')
 # Archive encryption shells out to one of these. Without them config-saver works
 # exactly as before; only a configuration that asks for encryption needs one.
-optdepends=('age: encrypt archives with age'
-            'gnupg: encrypt archives with gpg')
+optdepends=('age: encrypt archives with age (also needed for the restic store password)'
+            'gnupg: encrypt archives with gpg'
+            'restic: deduplicated encrypted storage and retention (config-saver --restic-init)')
 install=config-saver.install
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
 # Refresh with `updpkgsums` once the upstream tag exists; the placeholder makes
 # makepkg fail loudly instead of building an unverified tarball.
-sha256sums=('20b3e568a05e17edd4c8965f838c013d1f8ba880c749479de8c2478d7c651c76')     # Generated from the 3.4.0 tag
+sha256sums=('cd392dd0339c47e9354b95a8a6e677a72c2531ff555dcadb007e1080a4749635')
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
