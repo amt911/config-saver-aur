@@ -1,0 +1,27 @@
+pkgbase = config-saver
+	pkgdesc = Utility to back up and restore configuration files
+	pkgver = 3.7.0
+	pkgrel = 1
+	url = https://github.com/amt911/config-saver
+	install = config-saver.install
+	arch = any
+	license = MIT
+	makedepends = python-build
+	makedepends = python-installer
+	makedepends = python-wheel
+	makedepends = git
+	depends = python
+	depends = python-pydantic
+	depends = python-colorama
+	depends = python-tqdm
+	depends = python-yaml
+	depends = python-rich
+	optdepends = age: encrypt archives with age (also needed for the restic store password and --sync)
+	optdepends = gnupg: encrypt archives with gpg
+	optdepends = restic: deduplicated encrypted storage and retention (config-saver --restic-init), and --sync
+	optdepends = rclone: multi-machine sync over Google Drive, Proton Drive and other rclone remotes (config-saver --sync)
+	optdepends = libnotify: desktop notification when a scheduled sync fails (notify-send)
+	source = config-saver-3.7.0.tar.gz::https://github.com/amt911/config-saver/archive/refs/tags/3.7.0.tar.gz
+	sha256sums = b69be78d57207396368c89b6b79be7a58b928b4ddb60067d90091d6193437581
+
+pkgname = config-saver

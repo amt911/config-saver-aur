@@ -1,6 +1,6 @@
 # Maintainer: amt911 <your.email@example.com>
 pkgname=config-saver
-pkgver=3.5.0
+pkgver=3.7.0
 pkgrel=1
 pkgdesc="Utility to back up and restore configuration files"
 arch=('any')
@@ -10,14 +10,16 @@ depends=('python' 'python-pydantic' 'python-colorama' 'python-tqdm' 'python-yaml
 makedepends=('python-build' 'python-installer' 'python-wheel' 'git')
 # Archive encryption shells out to one of these. Without them config-saver works
 # exactly as before; only a configuration that asks for encryption needs one.
-optdepends=('age: encrypt archives with age (also needed for the restic store password)'
+optdepends=('age: encrypt archives with age (also needed for the restic store password and --sync)'
             'gnupg: encrypt archives with gpg'
-            'restic: deduplicated encrypted storage and retention (config-saver --restic-init)')
+            'restic: deduplicated encrypted storage and retention (config-saver --restic-init), and --sync'
+            'rclone: multi-machine sync over Google Drive, Proton Drive and other rclone remotes (config-saver --sync)'
+            'libnotify: desktop notification when a scheduled sync fails (notify-send)')
 install=config-saver.install
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
 # Refresh with `updpkgsums` once the upstream tag exists; the placeholder makes
 # makepkg fail loudly instead of building an unverified tarball.
-sha256sums=('cd392dd0339c47e9354b95a8a6e677a72c2531ff555dcadb007e1080a4749635')
+sha256sums=('b69be78d57207396368c89b6b79be7a58b928b4ddb60067d90091d6193437581')
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
@@ -51,4 +53,9 @@ package() {
     # User units: `systemctl --user enable --now config-saver.timer`
     install -Dm644 contrib/systemd/user/config-saver.service "$pkgdir/usr/lib/systemd/user/config-saver.service"
     install -Dm644 contrib/systemd/user/config-saver.timer "$pkgdir/usr/lib/systemd/user/config-saver.timer"
+
+    # Multi-machine sync: `systemctl --user enable --now config-saver-sync.timer`
+    install -Dm644 contrib/systemd/user/config-saver-sync.service "$pkgdir/usr/lib/systemd/user/config-saver-sync.service"
+    install -Dm644 contrib/systemd/user/config-saver-sync.timer "$pkgdir/usr/lib/systemd/user/config-saver-sync.timer"
+    install -Dm644 contrib/systemd/user/config-saver-notify@.service "$pkgdir/usr/lib/systemd/user/config-saver-notify@.service"
 }
