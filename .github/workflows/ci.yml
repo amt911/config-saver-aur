@@ -57,7 +57,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          # Pinned: on the 3.15 runner semgrep-core dies with -11 before scanning.
+          python-version: '3.13'
       - run: pip install semgrep
       # p/bash doesn't exist in the Semgrep registry; p/secrets + p/security-audit are the
       # closest generic coverage for a single PKGBUILD. Low signal for this repo, so advisory.
